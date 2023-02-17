@@ -7,8 +7,12 @@ import { CreateBookmarkDTO } from './dto/create-bookmark.dto';
 export class BookmarkService {
   constructor(private readonly prismaService: PrismaSerivce) {}
 
-  async findAllBookmark(): Promise<Bookmark[]> {
-    return await this.prismaService.bookmark.findMany();
+  async findAllBookmark(userId: string): Promise<Bookmark[]> {
+    return await this.prismaService.bookmark.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
   async saveBookmark(
@@ -19,6 +23,35 @@ export class BookmarkService {
       data: {
         ...bookmark,
         userId,
+      },
+    });
+  }
+
+  async findBookmarkById(userId: string, id: string): Promise<Bookmark> {
+    return await this.prismaService.bookmark.findFirst({
+      where: {
+        userId,
+        id,
+      },
+    });
+  }
+
+  async deleteBookmarkById(userId: string, id: string) {
+    await this.prismaService.bookmark.deleteMany({
+      where: {
+        userId,
+        id,
+      },
+    });
+  }
+
+  async updateB(id: string, bookmark: CreateBookmarkDTO): Promise<Bookmark> {
+    return await this.prismaService.bookmark.update({
+      data: {
+        ...bookmark,
+      },
+      where: {
+        id,
       },
     });
   }

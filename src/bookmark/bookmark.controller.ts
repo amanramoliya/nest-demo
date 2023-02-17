@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { Bookmark } from '@prisma/client';
 import { jwtPayload } from './../auth/dto/jwt.payload';
 import { JwtAuthGuard } from './../auth/jwt-auth-guard/jwt-auth.guard';
@@ -12,8 +21,12 @@ export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
   @Get()
   getAllBookmark(@UserDecorator() user: jwtPayload): Promise<Bookmark[]> {
-    console.log(user);
-    return this.bookmarkService.findAllBookmark();
+    return this.bookmarkService.findAllBookmark(user.id);
+  }
+
+  @Get('/:id')
+  getBookmarkById(@UserDecorator() user: jwtPayload, @Param('id') id: string) {
+    return this.bookmarkService.findBookmarkById(user.id, id);
   }
 
   @Post()
@@ -23,5 +36,18 @@ export class BookmarkController {
   ): Promise<Bookmark> {
     console.log(user);
     return this.bookmarkService.saveBookmark(bookmark, user.id);
+  }
+
+  @Put('/:id')
+  updateBookmark(@Param('id') id: string, @Body() bookmark: Bookmark) {
+    return this.bookmarkService.updateB(id, bookmark);
+  }
+
+  @Delete('/:id')
+  removeBookmarkById(
+    @UserDecorator() user: jwtPayload,
+    @Param('id') id: string,
+  ) {
+    this.bookmarkService.deleteBookmarkById(user.id, id);
   }
 }

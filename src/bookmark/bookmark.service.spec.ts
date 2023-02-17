@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaSerivce } from './../prisma/prisma.service';
 import { BookmarkService } from './bookmark.service';
+import { CreateBookmarkDTO } from './dto/create-bookmark.dto';
 describe('Bookmark', () => {
   let service: BookmarkService;
   let prismaService: PrismaSerivce;
@@ -15,6 +16,7 @@ describe('Bookmark', () => {
             return {
               bookmark: {
                 findMany: jest.fn(),
+                create: jest.fn(),
               },
             };
           },
@@ -37,5 +39,28 @@ describe('Bookmark', () => {
     expect(prismaService.bookmark.findMany).toBeCalledTimes(1);
 
     expect(result).toMatchObject([]);
+  });
+
+  it('should be createBookmark', async () => {
+    const bookmarkDTO: CreateBookmarkDTO = {
+      name: 'test',
+      url: 'test.png',
+      description: 'test description',
+    };
+
+    jest
+      .spyOn(prismaService.bookmark, 'create')
+      .mockResolvedValue({ ...bookmarkDTO, id: '1', userId: 'userid' });
+    const result = await service.saveBookmark(bookmarkDTO, 'userid');
+
+    expect(prismaService.bookmark.create).toBeCalledTimes(1);
+    expect(prismaService.bookmark.create).toHaveBeenCalledWith({
+      data: {
+        ...bookmarkDTO,
+        userId: 'userid',
+      },
+    });
+
+    expect(result).toMatchObject({ ...bookmarkDTO, id: '1', userId: 'userid' });
   });
 });

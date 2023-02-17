@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt/dist';
 import { compareSync, hash } from 'bcrypt';
-import { v4 as randomUUID } from 'uuid';
-import { UserStoreRepository } from './../store/user-store/user-store.repository';
+import { PrismaSerivce } from './../prisma/prisma.service';
 import { AuthDTO } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userStoreRepository: UserStoreRepository,
+    private prismaService: PrismaSerivce,
     private jwtService: JwtService,
   ) {}
 
   async signUpService(authData: AuthDTO) {
-    const user = this.userStoreRepository.findByEmail(authData.email);
+    const user = await this.prismaService.user.findFirst({
+      where: { email: authData.email },
+    });
 
     if (user) {
       throw new Error('Email Already exists');
@@ -21,21 +22,22 @@ export class AuthService {
 
     const hashedPassword = await hash(authData.password, 10);
 
-    const id = randomUUID();
-    this.userStoreRepository.save({
-      id: id,
-      email: authData.email,
-      password: hashedPassword,
+    await this.prismaService.user.create({
+      data: {
+        email: authData.email,
+        password: hashedPassword,
+      },
     });
 
     return {
-      id: id,
       email: authData.email,
     };
   }
 
   async signInService(authData: AuthDTO) {
-    const user = this.userStoreRepository.findByEmail(authData.email);
+    const user = await this.prismaService.user.findFirst({
+      where: { email: authData.email },
+    });
 
     if (!user) {
       throw new Error('Invalid email');
@@ -45,11 +47,11 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
-    const accessToken = this.jwtService.signAsync({
+    const accessToken = await this.jwtService.signAsync({
       id: user.id,
       email: user.email,
     });
 
-    return accessToken;
+    return { accessToken };
   }
 }

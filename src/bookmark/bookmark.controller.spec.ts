@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookmarkController } from './bookmark.controller';
 import { BookmarkService } from './bookmark.service';
+import { CreateBookmarkDTO } from './dto/create-bookmark.dto';
 
 describe('BookmarkController', () => {
   let controller: BookmarkController;
@@ -15,6 +16,7 @@ describe('BookmarkController', () => {
           useFactory() {
             return {
               findAllBookmark: jest.fn(),
+              saveBookmark: jest.fn(),
             };
           },
         },
@@ -29,11 +31,26 @@ describe('BookmarkController', () => {
     expect(controller).toBeDefined();
   });
   it('should be getAllBookmark', async () => {
-    jest.spyOn(service, 'findAllBookmark').mockReturnValueOnce(Promise.all([]));
+    jest.spyOn(service, 'findAllBookmark').mockResolvedValueOnce([]);
     const result = await controller.getAllBookmark();
 
     expect(service.findAllBookmark).toBeCalledTimes(1);
 
     expect(result).toMatchObject([]);
+  });
+  it('should be createBookmark', async () => {
+    const bookmark: CreateBookmarkDTO = {
+      name: 'test',
+      url: 'test.png',
+      description: 'test description',
+    };
+    jest
+      .spyOn(service, 'saveBookmark')
+      .mockResolvedValueOnce({ ...bookmark, id: '1', userId: 'userid' });
+    const result = await controller.createBookmark(bookmark);
+
+    expect(service.saveBookmark).toBeCalledTimes(1);
+
+    expect(result).toMatchObject(bookmark);
   });
 });

@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { StoreModule } from './store/store.module';
 import { userModule } from './user/user.module';
 import { PokemonModule } from './pokemon/pokemon.module';
+import { PowerModule } from './power/power.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PokemonModule } from './pokemon/pokemon.module';
     StoreModule,
     BookmarkModule,
     PokemonModule,
+    PowerModule,
   ],
   controllers: [],
   providers: [],

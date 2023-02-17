@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class createPokemonDto {
+export class CreatePokemonDto {
   @IsNotEmpty()
   name: string;
   @IsNotEmpty()
